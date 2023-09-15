@@ -1,4 +1,6 @@
-export const typeDefs = `#graphql
+import { gql } from "apollo-server-express";
+
+export const typeDefs = gql`#graphql
     type Game {
         id: ID!, # ! means required (not allowed to be null)
         title: String!,

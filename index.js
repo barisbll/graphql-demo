@@ -1,7 +1,11 @@
-import { ApolloServer } from "@apollo/server";
-import {startStandaloneServer} from "@apollo/server/standalone";
+import { ApolloServer } from "apollo-server-express";
+
 import { typeDefs } from "./schema.js";
 import db from "./_db.js";
+import express from "express";
+import http from "http";
+
+const app = express();
 
 const resolvers = {
     Query: {
@@ -70,16 +74,23 @@ const resolvers = {
     }
 }
 
-// server setup
-const server = new ApolloServer({
-    // typeDefs, -- definitions of types of data
-    typeDefs,
-    // resolvers,
-    resolvers,
+let apolloServer = null;
+async function startServer() {
+    apolloServer = new ApolloServer({
+        typeDefs,
+        resolvers,
+    });
+    await apolloServer.start();
+    apolloServer.applyMiddleware({ app });
+}
+startServer();
+
+app.get("/rest", function (req, res) {
+    res.json({ data: "api working" });
 });
+const httpserver = http.createServer(app);
 
-const url = await startStandaloneServer(server, {
-    port: 4000,
-})
-
-console.log(`🚀 Server ready at ${4000}`);
+app.listen(4000, function () {
+    console.log(`server running on port 4000`);
+    console.log(`gql path is ${apolloServer.graphqlPath}`);
+});
